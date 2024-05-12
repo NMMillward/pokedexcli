@@ -1,7 +1,6 @@
 package pokecache
 
 import (
-	"fmt"
 	"sync"
 	"time"
 )
@@ -21,7 +20,7 @@ func (cache *Cache) Add(key string, val []byte) {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
 	cache.entries[key] = cacheEntry{time.Now(), val}
-	fmt.Println("Added key:", key)
+	//fmt.Println("Added key:", key)
 }
 
 func (cache *Cache) Get(key string) ([]byte, bool) {
@@ -37,7 +36,7 @@ func (cache *Cache) Delete(key string) {
 	cache.mutex.Lock()
 	defer cache.mutex.Unlock()
 	delete(cache.entries, key)
-	fmt.Println("Deleted key:", key)
+	//fmt.Println("Deleted key:", key)
 }
 
 func (cache *Cache) Reap() {
@@ -45,8 +44,6 @@ func (cache *Cache) Reap() {
 		life := time.Now().Sub(cache.entries[key].createdAt)
 		if life >= cache.duration {
 			cache.Delete(key)
-		} else {
-			fmt.Println("Not old enough:", life, "<", cache.duration)
 		}
 	}
 }

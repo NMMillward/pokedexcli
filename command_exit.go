@@ -1,8 +1,11 @@
 package main
 
-import "os"
+import (
+	"github.com/nmmillward/pokedexcli/internal/pokecache"
+	"os"
+)
 
-func commandExit(cfg *config) error {
+func commandExit(_ *config, _ *pokecache.Cache) error {
 	os.Exit(0)
 	return nil
 }

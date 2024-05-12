@@ -3,18 +3,22 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/nmmillward/pokedexcli/internal/pokecache"
 	"os"
+	"strings"
+	"time"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(cfg *config) error
+	callback    func(cfg *config, cache *pokecache.Cache) error
 }
 
 type config struct {
 	next     int
 	previous int
+	params   []string
 }
 
 func getCommands() map[string]cliCommand {
@@ -35,15 +39,21 @@ func getCommands() map[string]cliCommand {
 			callback:    commandMap,
 		},
 		"mapb": {
-			name:        "map",
+			name:        "mapb",
 			description: "Display the previous 20 locations",
 			callback:    commandMapBack,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Explore the area of the give name or id\r\n\r\nExample: explore canalave-city-area",
+			callback:    commandExplore,
 		},
 	}
 }
 
 func main() {
 	commands := getCommands()
+	cache := pokecache.NewCache(time.Minute * 5)
 	cfg := config{
 		next:     1,
 		previous: 1,
@@ -54,12 +64,20 @@ func main() {
 		input := bufio.NewScanner(os.Stdin)
 		input.Scan()
 
-		if command, ok := commands[input.Text()]; ok {
-			if err := command.callback(&cfg); err != nil {
-				break
-			}
+		command := input.Text()
+		if len(command) == 0 {
+			_ = commandHelp(&cfg, cache)
 		} else {
-			_ = commandHelp(&cfg)
+			fields := strings.Fields(command)
+
+			if command, ok := commands[fields[0]]; ok {
+				cfg.params = fields[1:]
+				if err := command.callback(&cfg, cache); err != nil {
+					break
+				}
+			} else {
+				_ = commandHelp(&cfg, cache)
+			}
 		}
 	}
 }

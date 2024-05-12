@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/nmmillward/pokedexcli/internal/pokecache"
 	"io"
 	"log"
 	"net/http"
@@ -61,10 +62,10 @@ type LocationArea struct {
 	} `json:"pokemon_encounters"`
 }
 
-func commandMap(cfg *config) error {
+func commandMap(cfg *config, cache *pokecache.Cache) error {
 	count := 20
 	for i := 0; i < count; i++ {
-		name := getLocationArea(cfg.next + i)
+		name := getLocationAreaById(cfg.next+i, cache)
 		fmt.Println(name)
 	}
 	cfg.next += count
@@ -72,11 +73,11 @@ func commandMap(cfg *config) error {
 	return nil
 }
 
-func commandMapBack(cfg *config) error {
+func commandMapBack(cfg *config, cache *pokecache.Cache) error {
 	count := 20
 	start := cfg.previous - (count * 2)
 	for i := 0; i < count; i++ {
-		name := getLocationArea(start + i)
+		name := getLocationAreaById(start+i, cache)
 		fmt.Println(name)
 	}
 	cfg.next -= count
@@ -84,9 +85,41 @@ func commandMapBack(cfg *config) error {
 	return nil
 }
 
-func getLocationArea(id int) string {
+func commandExplore(cfg *config, cache *pokecache.Cache) error {
+	if len(cfg.params) == 0 {
+		print("Please provide at least one location area")
+		return nil
+	}
+	fmt.Println(fmt.Sprintf("Exploring %s...", cfg.params[0]))
+	if area, ok := getLocationArea(cfg.params[0], cache); ok {
+		fmt.Println("Found Pokemon:")
+		for _, encounter := range area.PokemonEncounters {
+			fmt.Println(" - ", encounter.Pokemon.Name)
+		}
+	}
+	return nil
+}
+
+func getLocationAreaById(id int, cache *pokecache.Cache) string {
+	return getLocationAreaName(fmt.Sprint(id), cache)
+}
+
+func getLocationAreaName(name string, cache *pokecache.Cache) string {
+	area, _ := getLocationArea(name, cache)
+	return area.Name
+}
+
+func getLocationArea(name string, cache *pokecache.Cache) (LocationArea, bool) {
 	area := LocationArea{}
-	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%d/", id)
+	url := fmt.Sprintf("https://pokeapi.co/api/v2/location-area/%v/", name)
+	if val, ok := cache.Get(url); ok {
+		//fmt.Println("Used cached value")
+		if err := json.Unmarshal(val, &area); err != nil {
+			log.Fatal(err)
+		} else {
+			return area, true
+		}
+	}
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -96,8 +129,9 @@ func getLocationArea(id int) string {
 	if err != nil {
 		log.Fatal(err)
 	}
+	cache.Add(url, body)
 	if err := json.Unmarshal(body, &area); err != nil {
 		log.Fatal(err)
 	}
-	return area.Name
+	return area, true
 }
