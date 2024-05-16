@@ -269,9 +269,25 @@ type Pokemon struct {
 	Weight int `json:"weight"`
 }
 
+func (P Pokemon) GetInspect() string {
+	inspect := ""
+	inspect += fmt.Sprintf("Name: %s\r\n", P.Name)
+	inspect += fmt.Sprintf("Height: %d\r\n", P.Height)
+	inspect += fmt.Sprintf("Weight: %d\r\n", P.Weight)
+	inspect += "Stats:\r\n"
+	for stat := range P.Stats {
+		inspect += fmt.Sprintf("  -%s: %d\r\n", P.Stats[stat].Stat.Name, P.Stats[stat].BaseStat)
+	}
+	inspect += "Types:\r\n"
+	for typ := range P.Types {
+		inspect += fmt.Sprintf("  - %s\r\n", P.Types[typ].Type.Name)
+	}
+	return inspect
+}
+
 func commandCatch(cfg *Config, cache *pokecache.Cache) error {
 	if len(cfg.params) == 0 {
-		fmt.Println("No target")
+		fmt.Println("You throw a ball into the void and ponder your own existence.")
 	} else {
 		fmt.Printf("Throwing a Pokeball at %s...\n", cfg.params[0])
 		if pokemon, ok := getPokemon(cfg.params[0], cache); ok {
