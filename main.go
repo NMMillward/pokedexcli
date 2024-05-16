@@ -12,13 +12,14 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(cfg *config, cache *pokecache.Cache) error
+	callback    func(cfg *Config, cache *pokecache.Cache) error
 }
 
-type config struct {
+type Config struct {
 	next     int
 	previous int
 	params   []string
+	pokedex  map[string]Pokemon
 }
 
 func getCommands() map[string]cliCommand {
@@ -48,15 +49,21 @@ func getCommands() map[string]cliCommand {
 			description: "Explore the area of the give name or id\r\n\r\nExample: explore canalave-city-area",
 			callback:    commandExplore,
 		},
+		"catch": {
+			name:        "catch",
+			description: "Attempt to catch a pokemon\r\n\r\nExample: catch pikachu",
+			callback:    commandCatch,
+		},
 	}
 }
 
 func main() {
 	commands := getCommands()
 	cache := pokecache.NewCache(time.Minute * 5)
-	cfg := config{
+	cfg := Config{
 		next:     1,
 		previous: 1,
+		pokedex:  make(map[string]Pokemon),
 	}
 
 	for {

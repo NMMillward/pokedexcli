@@ -62,7 +62,7 @@ type LocationArea struct {
 	} `json:"pokemon_encounters"`
 }
 
-func commandMap(cfg *config, cache *pokecache.Cache) error {
+func commandMap(cfg *Config, cache *pokecache.Cache) error {
 	count := 20
 	for i := 0; i < count; i++ {
 		name := getLocationAreaById(cfg.next+i, cache)
@@ -73,7 +73,7 @@ func commandMap(cfg *config, cache *pokecache.Cache) error {
 	return nil
 }
 
-func commandMapBack(cfg *config, cache *pokecache.Cache) error {
+func commandMapBack(cfg *Config, cache *pokecache.Cache) error {
 	count := 20
 	start := cfg.previous - (count * 2)
 	for i := 0; i < count; i++ {
@@ -85,7 +85,7 @@ func commandMapBack(cfg *config, cache *pokecache.Cache) error {
 	return nil
 }
 
-func commandExplore(cfg *config, cache *pokecache.Cache) error {
+func commandExplore(cfg *Config, cache *pokecache.Cache) error {
 	if len(cfg.params) == 0 {
 		print("Please provide at least one location area")
 		return nil
