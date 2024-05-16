@@ -295,6 +295,7 @@ func commandCatch(cfg *Config, cache *pokecache.Cache) error {
 			if chance > 0.6 {
 				fmt.Printf("%s was caught!\n", cfg.params[0])
 				cfg.pokedex[cfg.params[0]] = pokemon
+				fmt.Println("You may now inspect it with the inspect command.")
 			} else {
 				fmt.Printf("%s escaped!\n", cfg.params[0])
 			}

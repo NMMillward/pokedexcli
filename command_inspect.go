@@ -5,7 +5,7 @@ import (
 	"github.com/nmmillward/pokedexcli/internal/pokecache"
 )
 
-func commandInspect(cfg *Config, cache *pokecache.Cache) error {
+func commandInspect(cfg *Config, _ *pokecache.Cache) error {
 	if len(cfg.params) == 0 {
 		fmt.Println("You stare into an empty Pokeball. Are you ok?")
 	} else {
